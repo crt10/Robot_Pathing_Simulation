@@ -1,0 +1,186 @@
+$date
+     Oct 27, 2021       20:53:25
+$end
+
+$version
+ SystemC 2.3.3-Accellera --- Aug 24 2021 23:20:20
+$end
+
+$timescale
+     1 ps
+$end
+
+$scope module SystemC $end
+$var wire   32  aaaaa  robot_1 [31:0]  $end
+$var wire   32  aaaab  robot_2 [31:0]  $end
+$var wire   32  aaaac  robot_3 [31:0]  $end
+$var wire   32  aaaad  robot_4 [31:0]  $end
+$upscope $end
+$enddefinitions  $end
+
+$comment
+All initial values are dumped below at time 0 sec = 0 timescale units.
+$end
+
+$dumpvars
+b0 aaaaa
+b0 aaaab
+b0 aaaac
+b0 aaaad
+$end
+
+#1020000000000
+b10 aaaaa
+
+#1030000000000
+b1 aaaaa
+
+#1040000000000
+b10 aaaaa
+
+#2260000000000
+b10 aaaad
+
+#2280000000000
+b1 aaaad
+
+#2290000000000
+b10 aaaad
+
+#3740000000000
+b0 aaaad
+
+#4760000000000
+b10 aaaad
+
+#4790000000000
+b0 aaaad
+
+#5020000000000
+b10 aaaab
+
+#5030000000000
+b1 aaaab
+
+#5040000000000
+b10 aaaab
+
+#5260000000000
+b10 aaaad
+
+#7020000000000
+b10 aaaac
+
+#7030000000000
+b1 aaaac
+
+#7040000000000
+b10 aaaac
+
+#7540000000000
+b0 aaaaa
+
+#7740000000000
+b0 aaaac
+
+#8260000000000
+b10 aaaaa
+
+#8760000000000
+b10 aaaac
+
+#9240000000000
+b0 aaaad
+
+#9540000000000
+b0 aaaab
+
+#9760000000000
+b10 aaaad
+
+#10260000000000
+b10 aaaab
+
+#10740000000000
+b0 aaaac
+
+#11260000000000
+b10 aaaac
+
+#11740000000000
+b0 aaaac
+b0 aaaad
+
+#12760000000000
+b10 aaaac
+b10 aaaad
+
+#14240000000000
+b0 aaaaa
+
+#14740000000000
+b0 aaaac
+
+#16260000000000
+b10 aaaaa
+
+#16760000000000
+b10 aaaac
+
+#17050000000000
+b0 aaaac
+
+#17220000000000
+b0 aaaab
+
+#17240000000000
+b0 aaaad
+
+#17260000000000
+b10 aaaac
+
+#17760000000000
+b10 aaaab
+b10 aaaad
+
+#18740000000000
+b0 aaaac
+b0 aaaad
+
+#19250000000000
+b0 aaaaa
+
+#19740000000000
+b0 aaaab
+
+#19760000000000
+b10 aaaac
+
+#20260000000000
+b10 aaaad
+
+#20720000000000
+b0 aaaad
+
+#20760000000000
+b10 aaaad
+
+#21260000000000
+b10 aaaab
+
+#23780000000000
+b0 aaaad
+
+#25240000000000
+b0 aaaab
+
+#26760000000000
+b10 aaaab
+
+#27240000000000
+b0 aaaac
+
+#29740000000000
+b0 aaaab
+
+#30000000000000

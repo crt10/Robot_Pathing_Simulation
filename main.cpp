@@ -89,7 +89,8 @@ int sc_main(int argc, char* argv[]) {
 	
 
     //MODULES
-    processing<MAP_SIZE_X, MAP_SIZE_Y, GRID_SIZE_SCALED, NUM_OF_ROBOTS, NUM_OF_OBSTACLES> processing("processing", (const int*)map, (const int*) obstacle_path);
+	sc_trace_file* speed = sc_create_vcd_trace_file("speed_trace");
+    processing<MAP_SIZE_X, MAP_SIZE_Y, GRID_SIZE_SCALED, NUM_OF_ROBOTS, NUM_OF_OBSTACLES> processing("processing", (const int*)map, (const int*) obstacle_path, speed);
 	processing.clock(clock);
 	for (int i = 0; i < NUM_OF_ROBOTS; i++) {
 		processing.tx_ack[i](rx_ack_p[i]);
@@ -136,11 +137,11 @@ int sc_main(int argc, char* argv[]) {
 		robots[i].rx_data_s(rx_data_s[i]);
 	}
 	
-	stimulus<1200> stimulus("stim");
+	stimulus<1500> stimulus("stim");
 	stimulus.clock(clock);
 
     //TRACES
-    sc_trace_file* tf = sc_create_vcd_trace_file("cpu_trace");
+    sc_trace_file* tf = sc_create_vcd_trace_file("sim_trace");
     sc_trace(tf, clock, "clock");
     for (int i = 0; i < NUM_OF_ROBOTS; i++) {
     	sc_trace(tf, tx_ack_s[i], "tx_ack_from_server" + i);
@@ -159,8 +160,9 @@ int sc_main(int argc, char* argv[]) {
 	
 
     //START SIM
-    sc_start(((1200)*2)*10, SC_MS);
+    sc_start(((1500)*2)*10, SC_MS);
     sc_close_vcd_trace_file(tf);
+	sc_close_vcd_trace_file(speed);
 
     return 0;
 }

@@ -18,8 +18,8 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 		//CONSTRUCTOR
 		SC_HAS_PROCESS(processing);
 		
-		processing(sc_module_name name, const int* map_ptr, const int* obstacle_path_ptr):
-		sc_module(name), _map_ptr(map_ptr), _obstacle_path_ptr(obstacle_path_ptr) {
+		processing(sc_module_name name, const int* map_ptr, const int* obstacle_path_ptr, sc_trace_file* tf_ptr):
+		sc_module(name), _map_ptr(map_ptr), _obstacle_path_ptr(obstacle_path_ptr) , tf(tf_ptr){
 			SC_METHOD(prc_update);
 			sensitive << clock.pos();
 			
@@ -69,13 +69,13 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 				
 				_robots[i].position_x = grid_size/2;			//init robots to center of grid
 				_robots[i].position_y = grid_size/2;
-				_robots[i].speed = ROBOT_SPEED;					//init robot speed to 2 (default for phase 2)
+				_robots[i].speed = 0;					//init robot speed to 0 (default for phase 2)
 				
 				_main_table[i].status = 4;						//init main_table
 				_main_table[i].prev_status = 0;
 //				_main_table[i].current_grid = _robot_path[i][0];
 //				_main_table[i].next_grid = _robot_path[i][1];
-				_main_table[i].speed = ROBOT_SPEED;
+				_main_table[i].speed = 0;
 				_main_table[i].modified = false;
 //				for (int x = 0; x < map_size_x; x++) {
 //					for (int y = 0; y < map_size_y; y++) {
@@ -115,6 +115,11 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 			}
 			_tx_counter = 0;
 			_rx_counter = 0;
+
+			sc_trace(tf, _main_table[0].speed, "robot_1");
+			sc_trace(tf, _main_table[1].speed, "robot_2");
+			sc_trace(tf, _main_table[2].speed, "robot_3");
+			sc_trace(tf, _main_table[3].speed, "robot_4");
 		}
 
 	private:
@@ -173,7 +178,9 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 		sc_event tx_signal;
 
 		int _clock_count = -1;
-		
+
+		sc_trace_file* tf;
+
 		//PROCESS
 		void prc_tx() {
 			while (1) {
@@ -227,22 +234,27 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 							case 5:
 								_main_table[i].prev_status = _main_table[i].status;
 								_main_table[i].status = 1;
+								_main_table[i].speed = 2;
 								break;
 							case 6:
 								_main_table[i].prev_status = _main_table[i].status;
 								_main_table[i].status = 0;
+								_main_table[i].speed = 2;
 								break;
 							case 7:
 							case 8:
 								_main_table[i].prev_status = _main_table[i].status;
 								_main_table[i].status = 3;
+								_main_table[i].speed = 0;
 								break;
 							case 9:
 								_main_table[i].status = _main_table[i].prev_status;
+								_main_table[i].speed = 2;
 								break;
 							case 10:
 								fifo_data[i].nb_read(data);
 								_robots[i].speed = data;
+								_main_table[i].speed = data;
 								cout << "Robot_" << (i+1) << " speed is now " << _robots[i].speed << endl;
 								break;
 							case 11:
@@ -317,6 +329,7 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 						else {
 							_main_table[i].prev_status = _main_table[i].status;
 							_main_table[i].status = 3;		//update status to stopped
+							_main_table[i].speed = 0;
 							_tx_table[i].status = 0;
 							_tx_table[i].modified = true;
 							_tx_counter++;
@@ -336,6 +349,7 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 						else {
 							_main_table[i].prev_status = _main_table[i].status;
 							_main_table[i].status = 3;		//update status to stopped
+							_main_table[i].speed = 0;
 							_tx_table[i].status = 0;
 							_tx_table[i].modified = true;
 							_tx_counter++;
@@ -357,6 +371,7 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 						else {
 							_main_table[i].prev_status = _main_table[i].status;
 							_main_table[i].status = 3;			//update status to stopped
+							_main_table[i].speed = 0;
 							_tx_table[i].status = 0;
 							_tx_table[i].modified = true;
 							_tx_counter++;
@@ -547,21 +562,23 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 			}
 			else {
 				if (obstacle == num_of_obstacles) {
-					if (_robots[robot].position_x < grid_size/2) {
+					if (_robots[robot].position_x < (grid_size/2 - _robots[robot].speed)) {
 						_robots[robot].position_x += _robots[robot].speed;
 					}
-					else if (_robots[robot].position_x > grid_size/2) {
+					else if (_robots[robot].position_x > (grid_size/2 + _robots[robot].speed)) {
 						_robots[robot].position_x -= _robots[robot].speed;
 					}
-					else if (_robots[robot].position_y < grid_size/2) {
+					else if (_robots[robot].position_y < (grid_size/2 - _robots[robot].speed)) {
 						_robots[robot].position_y += _robots[robot].speed;
 					}
-					else if (_robots[robot].position_y > grid_size/2) {
+					else if (_robots[robot].position_y > (grid_size/2 + _robots[robot].speed)) {
 						_robots[robot].position_y -= _robots[robot].speed;
 					}
 					if (_main_table[robot].next_grid == -1 &&
-						_robots[robot].position_x == grid_size/2 &&
-						_robots[robot].position_y == grid_size/2) {	//Edge case for when robot reaches last grid in path
+						_robots[robot].position_x <= (grid_size/2 + _robots[robot].speed) &&
+						_robots[robot].position_x >= (grid_size/2 - _robots[robot].speed) &&
+						_robots[robot].position_y <= (grid_size/2 + _robots[robot].speed) &&
+						_robots[robot].position_y >= (grid_size/2 - _robots[robot].speed)) {	//Edge case for when robot reaches last grid in path
 						return false;
 					}
 					else {
@@ -749,6 +766,8 @@ template<int map_size_x, int map_size_y, int grid_size, int num_of_robots, int n
 						<< " | Position in grid: ("
 						<< _robots[i].position_x << ", "
 						<< _robots[i].position_y << ")"
+						<< _main_table[i].status 
+						<< _main_table[i].next_grid_map_x << _main_table[i].current_grid_map_x << _main_table[i].next_grid_map_y << _main_table[i].current_grid_map_y
 						<< endl;
 			}
 			for (int i = 0; i < num_of_obstacles; i++) {

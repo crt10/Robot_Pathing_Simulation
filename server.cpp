@@ -128,7 +128,7 @@ template<int map_size_x, int map_size_y, int num_of_robots> class server:public 
 							switch(_rx_table[i].status) {
 								case 0:
 								case 3:
-									_main_table[i].status = 3;
+									_main_table[i].status = 7;
 									break;
 								case 1:
 									if (robot_move(i)) {
