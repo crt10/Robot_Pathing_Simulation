@@ -7,7 +7,7 @@
 #define CLOCK_FREQUENCY 100
 #define MAP_SIZE_X 10
 #define MAP_SIZE_Y 9
-#define GRID_SIZE 2
+#define GRID_SIZE 2000		//represents 2000 mmm
 #define NUM_OF_ROBOTS 4
 #define NUM_OF_OBSTACLES 6
 #define GRID_SIZE_SCALED GRID_SIZE*CLOCK_FREQUENCY
@@ -52,10 +52,10 @@ int sc_main(int argc, char* argv[]) {
 	sc_signal<bool> rx_ack_p[NUM_OF_ROBOTS];
 	sc_signal<bool> rx_flag_p[NUM_OF_ROBOTS];
 	sc_signal<sc_uint<16> > rx_data_p[NUM_OF_ROBOTS];
-	sc_fifo<int> fifo_data_robot1(32);
-	sc_fifo<int> fifo_data_robot2(32);
-	sc_fifo<int> fifo_data_robot3(32);
-	sc_fifo<int> fifo_data_robot4(32);
+	sc_fifo<int> fifo_data_robot1(80);
+	sc_fifo<int> fifo_data_robot2(80);
+	sc_fifo<int> fifo_data_robot3(80);
+	sc_fifo<int> fifo_data_robot4(80);
 	
 	//LOCAL VAR
 	const int map[MAP_SIZE_Y][MAP_SIZE_X] = 
@@ -72,10 +72,10 @@ int sc_main(int argc, char* argv[]) {
 	};
 	const int robot_path[NUM_OF_ROBOTS][23] =
 	{
-		{	5,6,7,8,9,10,12,22,21,20,19,18,17,16,15,14,13,-1	},
-		{	3,4,5,6,7,8,9,10,12,22,21,20,19,18,24,31,30,29,28,27,26,23,-1	},
-		{	48,47,46,45,37,32,31,30,29,28,27,26,36,39,49,51,-1	},
-		{	50,48,38,35,34,33,32,31,30,29,28,27,26,36,39,40,41,42,-1	}
+		{	1,11,13,14,15,16,17,18,24,31,30,29,28,27,26,36,39,49,51,52,53,-1	},
+		{	10,12,22,21,20,19,18,24,31,32,33,34,35,25,-1	},
+		{	51,49,39,36,26,27,28,29,30,31,32,37,45,46,47,48,38,-1	},
+		{	60,50,48,47,46,45,44,43,42,41,40,39,36,26,23,-1	}
 	};
 	const int obstacle_path[NUM_OF_OBSTACLES][23] =
 	{
@@ -89,7 +89,7 @@ int sc_main(int argc, char* argv[]) {
 	
 
     //MODULES
-	sc_trace_file* speed = sc_create_vcd_trace_file("speed_trace");
+	sc_trace_file* speed = sc_create_vcd_trace_file("robot_trace");
     processing<MAP_SIZE_X, MAP_SIZE_Y, GRID_SIZE_SCALED, NUM_OF_ROBOTS, NUM_OF_OBSTACLES> processing("processing", (const int*)map, (const int*) obstacle_path, speed);
 	processing.clock(clock);
 	for (int i = 0; i < NUM_OF_ROBOTS; i++) {
@@ -137,30 +137,31 @@ int sc_main(int argc, char* argv[]) {
 		robots[i].rx_data_s(rx_data_s[i]);
 	}
 	
-	stimulus<1500> stimulus("stim");
+	stimulus<2700> stimulus("stim");
 	stimulus.clock(clock);
 
     //TRACES
     sc_trace_file* tf = sc_create_vcd_trace_file("sim_trace");
     sc_trace(tf, clock, "clock");
     for (int i = 0; i < NUM_OF_ROBOTS; i++) {
-    	sc_trace(tf, tx_ack_s[i], "tx_ack_from_server" + i);
-    	sc_trace(tf, tx_flag_s[i], "tx_flag_to_server" + i);
-    	sc_trace(tf, tx_data_s[i], "tx_data_to_server" + i);
-        sc_trace(tf, rx_ack_s[i], "rx_ack_to_server" + i);
-    	sc_trace(tf, rx_flag_s[i], "rx_flag_from_server" + i);
-    	sc_trace(tf, rx_data_s[i], "rx_data_from_server" + i);
-    	sc_trace(tf, tx_ack_p[i], "tx_ack_from_processing" + i);
-    	sc_trace(tf, tx_flag_p[i], "tx_flag_to_processing" + i);
-    	sc_trace(tf, tx_data_p[i], "tx_data_to_processing" + i);
-        sc_trace(tf, rx_ack_p[i], "rx_ack_to_processing" + i);
-    	sc_trace(tf, rx_flag_p[i], "rx_flag_from_processing" + i);
-    	sc_trace(tf, rx_data_p[i], "rx_data_from_srocessing" + i);
+		char num = i + '0';
+    	sc_trace(tf, tx_ack_s[i], "tx_ack_from_server" + std::to_string(i+1));
+    	sc_trace(tf, tx_flag_s[i], "tx_flag_to_server" + std::to_string(i+1));
+    	sc_trace(tf, tx_data_s[i], "tx_data_to_server" + std::to_string(i+1));
+        sc_trace(tf, rx_ack_s[i], "rx_ack_to_server" + std::to_string(i+1));
+    	sc_trace(tf, rx_flag_s[i], "rx_flag_from_server" + std::to_string(i+1));
+    	sc_trace(tf, rx_data_s[i], "rx_data_from_server" + std::to_string(i+1));
+    	sc_trace(tf, tx_ack_p[i], "tx_ack_from_processing" + std::to_string(i+1));
+    	sc_trace(tf, tx_flag_p[i], "tx_flag_to_processing" + std::to_string(i+1));
+    	sc_trace(tf, tx_data_p[i], "tx_data_to_processing" + std::to_string(i+1));
+        sc_trace(tf, rx_ack_p[i], "rx_ack_to_processing" + std::to_string(i+1));
+    	sc_trace(tf, rx_flag_p[i], "rx_flag_from_processing" + std::to_string(i+1));
+    	sc_trace(tf, rx_data_p[i], "rx_data_from_srocessing" + std::to_string(i+1));
 	}
 	
 
     //START SIM
-    sc_start(((1500)*2)*10, SC_MS);
+    sc_start(((2700)*2)*10, SC_MS);
     sc_close_vcd_trace_file(tf);
 	sc_close_vcd_trace_file(speed);
 
